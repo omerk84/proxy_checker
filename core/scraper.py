@@ -48,13 +48,43 @@ class ProxyScraper:
                     if html_proxies is not None:
                         proxies.extend(html_proxies)
                     else:
-                        matches = IP_PORT_PATTERN.findall(text)
-                        for ip, port_str in matches:
-                            port = int(port_str)
-                            if 1 <= port <= 65535:
-                                proxies.append(
-                                    Proxy(host=ip, port=port, protocol=self.protocol)
-                                )
+                        # 1. Automatic JSON payload extraction (e.g. Geonode, ProxyCompass, REST APIs)
+                        stripped = text.strip()
+                        if stripped.startswith("{") or stripped.startswith("["):
+                            try:
+                                import json
+                                json_data = json.loads(stripped)
+                                items = []
+                                if isinstance(json_data, dict):
+                                    items = json_data.get("data") or json_data.get("results") or json_data.get("proxies") or []
+                                    if not isinstance(items, list):
+                                        items = [json_data]
+                                elif isinstance(json_data, list):
+                                    items = json_data
+
+                                for item in items:
+                                    if isinstance(item, dict):
+                                        ip = item.get("ip") or item.get("ip_address") or item.get("host")
+                                        port_raw = item.get("port")
+                                        if ip and port_raw:
+                                            try:
+                                                port = int(port_raw)
+                                                if 1 <= port <= 65535:
+                                                    proxies.append(Proxy(host=str(ip).strip(), port=port, protocol=self.protocol))
+                                            except (ValueError, TypeError):
+                                                pass
+                            except Exception:
+                                pass
+
+                        # 2. Text-based IP:Port extraction (standard raw feeds and txt/csv dumps)
+                        if not proxies:
+                            matches = IP_PORT_PATTERN.findall(text)
+                            for ip, port_str in matches:
+                                port = int(port_str)
+                                if 1 <= port <= 65535:
+                                    proxies.append(
+                                        Proxy(host=ip, port=port, protocol=self.protocol)
+                                    )
                 else:
                     logger.debug(f"Source returned HTTP {response.status}: {url}")
         except Exception as e:

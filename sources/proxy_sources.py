@@ -148,6 +148,9 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
 
         # 38. ErcinDedeoglu (64,000+ Active Worldwide Proxies)
         "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/http.txt",
+
+        # 39. zevtyardt (64,000+ Verified HTTP Proxies)
+        "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/http.txt",
     ],
     ProxyProtocol.SOCKS4: [
         # --- Tier 1: Real-Time Verified Champions (Strictly Ranked by <= 700ms Density) ---
@@ -272,6 +275,9 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
 
         # 38. ErcinDedeoglu SOCKS4 (22,000+ Active SOCKS4 Proxies)
         "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/socks4.txt",
+
+        # 39. zevtyardt SOCKS4 (21,000+ Verified SOCKS4 Proxies)
+        "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/socks4.txt",
     ],
     ProxyProtocol.SOCKS5: [
         # --- Tier 1: Real-Time Verified Champions (Strictly Ranked by <= 700ms Density) ---
@@ -394,6 +400,9 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
 
         # 36. ErcinDedeoglu SOCKS5 (73,000+ Worldwide SOCKS5 Proxies)
         "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/socks5.txt",
+
+        # 37. zevtyardt SOCKS5 (23,000+ Verified SOCKS5 Proxies)
+        "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/socks5.txt",
     ],
 }
 
