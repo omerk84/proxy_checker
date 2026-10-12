@@ -8,14 +8,35 @@ import sys
 import urllib.request
 from typing import List, Optional
 
-# Windows Proactor transport patch for WinError 10054 on abruptly closed sockets
+# Windows console UTF-8 & VT100 color support and Proactor transport patch
 if sys.platform == "win32":
     try:
         if sys.stdout and hasattr(sys.stdout, "reconfigure"):
             sys.stdout.reconfigure(encoding="utf-8", errors="replace")
         if sys.stderr and hasattr(sys.stderr, "reconfigure"):
             sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
+    try:
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        for h_id in (-11, -12):
+            h = kernel32.GetStdHandle(h_id)
+            if h and h != -1:
+                mode = ctypes.c_ulong()
+                if kernel32.GetConsoleMode(h, ctypes.byref(mode)):
+                    kernel32.SetConsoleMode(h, mode.value | 0x0004 | 0x0008)
+        h_con = kernel32.CreateFileW("CONOUT$", 0x40000000, 2, None, 3, 0, None)
+        if h_con and h_con != -1:
+            mode = ctypes.c_ulong()
+            if kernel32.GetConsoleMode(h_con, ctypes.byref(mode)):
+                kernel32.SetConsoleMode(h_con, mode.value | 0x0004 | 0x0008)
+            kernel32.CloseHandle(h_con)
+    except Exception:
+        pass
+
+    try:
         from asyncio.proactor_events import _ProactorBasePipeTransport
         _orig_call_connection_lost = _ProactorBasePipeTransport._call_connection_lost
 

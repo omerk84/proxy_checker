@@ -1,6 +1,12 @@
 @echo off
 setlocal
 title Proxy Scraper and Checker
+
+REM Force UTF-8 terminal code page and Python UTF-8 environment for clean styling & boxes
+chcp 65001 >nul 2>nul
+set "PYTHONIOENCODING=utf-8"
+set "PYTHONUTF8=1"
+
 cd /d "%~dp0"
 
 echo ===================================================

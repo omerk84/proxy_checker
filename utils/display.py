@@ -6,6 +6,7 @@ import sys
 from typing import List, Tuple, Dict, Optional
 from pathlib import Path
 
+from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -22,24 +23,62 @@ from rich.progress import (
 import config
 from core.models import Proxy, ProxyProtocol
 
-if sys.platform == "win32":
-    try:
-        if sys.stdout and hasattr(sys.stdout, "reconfigure"):
-            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-        if sys.stderr and hasattr(sys.stderr, "reconfigure"):
-            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
-    except Exception:
-        pass
 
-console = Console(legacy_windows=False)
+def setup_windows_console():
+    """
+    Ensures Windows terminal has UTF-8 encoding and Virtual Terminal Processing (VT100)
+    enabled, guaranteeing rich colors, rounded borders, and proper spacing in cmd.exe.
+    """
+    if sys.platform == "win32":
+        try:
+            if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+                sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+            if sys.stderr and hasattr(sys.stderr, "reconfigure"):
+                sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
+        try:
+            import ctypes
+            kernel32 = ctypes.windll.kernel32
+            # 0x0004 = ENABLE_VIRTUAL_TERMINAL_PROCESSING
+            # 0x0008 = DISABLE_NEWLINE_AUTO_RETURN
+            for h_id in (-11, -12):
+                h = kernel32.GetStdHandle(h_id)
+                if h and h != -1:
+                    mode = ctypes.c_ulong()
+                    if kernel32.GetConsoleMode(h, ctypes.byref(mode)):
+                        kernel32.SetConsoleMode(h, mode.value | 0x0004 | 0x0008)
+
+            # Also apply directly to CONOUT$ in case standard handles are wrapped
+            h_con = kernel32.CreateFileW("CONOUT$", 0x40000000, 2, None, 3, 0, None)
+            if h_con and h_con != -1:
+                mode = ctypes.c_ulong()
+                if kernel32.GetConsoleMode(h_con, ctypes.byref(mode)):
+                    kernel32.SetConsoleMode(h_con, mode.value | 0x0004 | 0x0008)
+                kernel32.CloseHandle(h_con)
+        except Exception:
+            pass
+
+
+setup_windows_console()
+
+console = Console(
+    force_terminal=True,
+    color_system="auto",
+    safe_box=False,
+    highlight=False,
+)
 
 
 def show_banner():
     """Prints the application banner."""
+    console.print()
     banner_text = Text()
     banner_text.append("=== PROXY SCRAPER & SPEED CHECKER ===\n", style="bold cyan")
-    banner_text.append("High-Performance Asynchronous Proxy Discovery & MS Latency Benchmarking", style="dim white")
-    console.print(Panel(banner_text, border_style="cyan", expand=False))
+    banner_text.append("High-Performance Asynchronous Discovery & MS Latency Benchmarking", style="dim white")
+    console.print(Panel(banner_text, border_style="cyan", box=box.ROUNDED, expand=False))
+    console.print()
 
 
 def prompt_protocol() -> ProxyProtocol:
@@ -47,7 +86,7 @@ def prompt_protocol() -> ProxyProtocol:
     Step 1: Displays the interactive protocol selection menu.
     Returns: selected ProxyProtocol
     """
-    menu = Table(show_header=True, header_style="bold magenta", border_style="dim")
+    menu = Table(show_header=True, header_style="bold magenta", border_style="cyan", box=box.ROUNDED)
     menu.add_column("Option", style="bold yellow", width=8, justify="center")
     menu.add_column("Protocol", style="bold white", width=16)
     menu.add_column("Description", style="dim")
@@ -57,15 +96,16 @@ def prompt_protocol() -> ProxyProtocol:
     menu.add_row("3", "SOCKS5", "Advanced proxying with UDP and authentication support")
 
     console.print(menu)
+    console.print()
 
     while True:
-        choice = console.input("\n[bold cyan]Select proxy type to scrape & check [1/2/3] (default 1): [/bold cyan]").strip()
+        choice = console.input("[bold cyan]  [?] Select proxy protocol [1/2/3] (default 1): [/bold cyan]").strip()
         if not choice:
             choice = "1"
         try:
             return ProxyProtocol.from_choice(choice)
         except ValueError:
-            console.print("[bold red]Invalid option. Please choose 1, 2, or 3.[/bold red]")
+            console.print("[bold red]  [!] Invalid option. Please choose 1, 2, or 3.[/bold red]\n")
 
 
 def prompt_checker_options(total_scraped: int) -> Tuple[float, int, int, int]:
@@ -73,37 +113,47 @@ def prompt_checker_options(total_scraped: int) -> Tuple[float, int, int, int]:
     Step 2 (after scraping finishes): Prompts user for Max MS latency, Concurrency, and Retries.
     Returns: (max_latency_ms, concurrency, max_to_check, retries)
     """
+    console.print()
     console.print(Panel(
-        f"[bold white]Total proxies scraped and available to test:[/] [bold green]{total_scraped:,}[/bold green]",
-        title="[bold yellow]Configure Checker Parameters[/bold yellow]",
+        f"  Total proxies scraped & ready to test: [bold green]{total_scraped:,}[/bold green]\n"
+        f"  [dim]Configure latency thresholds, thread concurrency, and retries below:[/dim]",
+        title="[bold yellow]  Configure Checker Parameters  [/bold yellow]",
         border_style="yellow",
+        box=box.ROUNDED,
         expand=False,
     ))
+    console.print()
 
     # 1. Max MS Prompt
     max_ms_input = console.input(
-        "[bold cyan]Max MS Latency (e.g. 1000 for <=1000ms, Enter for 1000ms): [/bold cyan]"
+        "[bold cyan]  [?] Max MS Latency (e.g. 1000 for <=1000ms, Enter for 1000ms): [/bold cyan]"
     ).strip()
     try:
         max_ms = float(max_ms_input) if max_ms_input else 1000.0
     except ValueError:
         max_ms = 1000.0
 
+    console.print()
+
     # 2. Concurrency (Threads) Prompt
     threads_input = console.input(
-        f"[bold cyan]Threads / Concurrency [Enter for {config.DEFAULT_CONCURRENCY}]: [/bold cyan]"
+        f"[bold cyan]  [?] Threads / Concurrency [Enter for {config.DEFAULT_CONCURRENCY}]: [/bold cyan]"
     ).strip()
     concurrency = int(threads_input) if threads_input.isdigit() and int(threads_input) > 0 else config.DEFAULT_CONCURRENCY
 
+    console.print()
+
     # 3. Retries for failed proxies
     retries_input = console.input(
-        "[bold cyan]Retries on failure [0 for fastest, 1 for second-chance retry] (default 1): [/bold cyan]"
+        "[bold cyan]  [?] Retries on failure [0 for fastest, 1 for second-chance retry] (default 1): [/bold cyan]"
     ).strip()
     retries = int(retries_input) if retries_input.isdigit() else 1
 
+    console.print()
+
     # 4. Candidate limit prompt
     limit_input = console.input(
-        f"[bold cyan]How many proxies to test? [Enter for ALL ({total_scraped:,}), or enter a number, e.g. 1000]: [/bold cyan]"
+        f"[bold cyan]  [?] How many proxies to test? [Enter for ALL ({total_scraped:,}), or enter a number, e.g. 1000]: [/bold cyan]"
     ).strip()
     max_to_check = int(limit_input) if limit_input.isdigit() and int(limit_input) > 0 else total_scraped
 
@@ -170,14 +220,17 @@ def show_summary_and_top_proxies(
         f"[bold red][SLOW]:[/] {slow_count}\n"
         f"[bold cyan]Average Latency:[/] [bold yellow]{avg_ms} ms[/] (Filter: <= {int(max_ms)} ms)"
     )
-    console.print(Panel(stats_text, title="[bold green]Scan Results Summary[/bold green]", border_style="green"))
+    console.print()
+    console.print(Panel(stats_text, title="[bold green]Scan Results Summary[/bold green]", border_style="green", box=box.ROUNDED))
+    console.print()
 
     # Top Fastest Proxies Table
     if checked_alive:
         table = Table(
             title=">>> Top Fastest Working Proxies (Lowest MS) <<<",
             header_style="bold cyan",
-            border_style="dim",
+            border_style="cyan",
+            box=box.ROUNDED,
         )
         table.add_column("#", justify="center", style="dim", width=4)
         table.add_column("Proxy Address", style="bold white", width=22)
@@ -210,11 +263,13 @@ def show_summary_and_top_proxies(
                 anon_style,
             )
 
-
         console.print(table)
+        console.print()
     else:
-        console.print(f"[bold red]No working proxies found with latency <= {int(max_ms)}ms. Consider increasing max MS or testing more proxies.[/bold red]")
+        console.print(f"[bold red]No working proxies found with latency <= {int(max_ms)}ms. Consider increasing max MS or testing more proxies.[/bold red]\n")
 
     # Output files listing
     files_info = "\n".join([f"  [*] [bold white]{key.upper()}:[/] [dim]{path}[/dim]" for key, path in file_paths.items()])
-    console.print(Panel(files_info, title="[bold cyan]Saved Output Files[/bold cyan]", border_style="cyan"))
+    console.print(Panel(files_info, title="[bold cyan]Saved Output Files[/bold cyan]", border_style="cyan", box=box.ROUNDED))
+    console.print()
+
