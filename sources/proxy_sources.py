@@ -10,8 +10,12 @@ from core.models import ProxyProtocol
 
 PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
     ProxyProtocol.HTTP: [
-        # --- Tier 1: Ultra-Fast sub-200ms Verified Champions (Highest sub-700ms Density) ---
-        # 1. freeproxy.world (100% Alive Rate - 17.0ms Fastest - Multi-Page)
+        # --- Tier 1: Ultra-Fast sub-200ms Verified Champions & REST APIs (Top Precedence) ---
+        # 1. proxyscrape.com (Official Live Public API v4 & v2 - Full Pool Unconstrained)
+        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=http",
+        "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&country=all",
+
+        # 2. freeproxy.world (100% Alive Rate - 17.0ms Fastest - Multi-Page)
         "https://www.freeproxy.world/?type=http&page=1",
         "https://www.freeproxy.world/?type=http&page=2",
         "https://www.freeproxy.world/?type=http&page=3",
@@ -108,12 +112,7 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 26. proxy-daily.com (Export API - 183ms Fastest)
         "https://proxy-daily.com/api/export_proxies_ip_port?protocol=https",
 
-        # 27. proxyscrape.com (Official Live Public API v4 & v2 - High Density Verified)
-        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=http&timeout=5000",
-        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=http&anonymity=elite,anonymous&timeout=5000",
-        "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=5000&country=all",
-
-        # 28. spys.me (Direct Feed)
+        # 27. spys.me (Direct Feed)
         "https://spys.me/proxy.txt",
 
         # 29. proxy-list.org (Working Pages)
@@ -154,7 +153,11 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
     ],
     ProxyProtocol.SOCKS4: [
         # --- Tier 1: Real-Time Verified Champions (Strictly Ranked by <= 700ms Density) ---
-        # 1. vakhov/fresh-proxy-list (13/30 <= 700ms - Highest sub-700ms Density)
+        # 1. proxyscrape.com (Official Live Public API v4 & v2 - Full Pool Unconstrained)
+        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=socks4",
+        "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4&country=all",
+
+        # 2. vakhov/fresh-proxy-list (13/30 <= 700ms - Highest sub-700ms Density)
         "https://raw.githubusercontent.com/vakhov/fresh-proxy-list/master/socks4.txt",
 
         # 2. rdavydov/proxy-list (12/30 <= 700ms - 630 Fresh SOCKS4 Proxies)
@@ -213,11 +216,7 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 18. Geonode Public REST API (376.4ms Fastest)
         "https://proxylist.geonode.com/api/proxy-list?protocols=socks4&limit=500&page=1&sort_by=lastChecked&sort_type=desc",
 
-        # 19. proxyscrape.com (Official Live Public API v4 & v2 - 412.5ms Fastest)
-        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=socks4&timeout=5000",
-        "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4&timeout=5000&country=all",
-
-        # 20. socks-proxy.net (300 Dedicated Verified SOCKS4 Proxies - 272.7ms Fastest)
+        # 19. socks-proxy.net (300 Dedicated Verified SOCKS4 Proxies - 272.7ms Fastest)
         "https://www.socks-proxy.net/",
 
         # 21. freeproxy.world (Multi-Page Web Scraping - 283.9ms Fastest)
@@ -281,7 +280,11 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
     ],
     ProxyProtocol.SOCKS5: [
         # --- Tier 1: Real-Time Verified Champions (Strictly Ranked by <= 700ms Density) ---
-        # 1. proxmint (9/30 <= 700ms - 256.3ms Fastest! GitHub + Live API)
+        # 1. proxyscrape.com (Official Live Public API v4 & v2 - Full Pool Unconstrained - 2,400+ Live SOCKS5)
+        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=socks5",
+        "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks5&country=all",
+
+        # 2. proxmint (9/30 <= 700ms - 256.3ms Fastest! GitHub + Live API)
         "https://raw.githubusercontent.com/proxmint/free-proxy-list/main/proxies/socks5.txt",
         "https://proxmint.com/api/free-proxies?protocol=socks5&format=txt",
 
@@ -354,12 +357,7 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 22. spys.me (511.3ms Fastest)
         "https://spys.me/socks.txt",
 
-        # 23. proxyscrape.com (Official Live Public API v4 & v2 - 1,240+ Live SOCKS5 Proxies)
-        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=socks5&timeout=5000",
-        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=socks5&anonymity=elite,anonymous&timeout=5000",
-        "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks5&timeout=5000&country=all",
-
-        # 24. proxifly SOCKS5 (14/30 Alive - 586.7ms Fastest - 51,000 Proxies)
+        # 23. proxifly SOCKS5 (14/30 Alive - 586.7ms Fastest - 51,000 Proxies)
         "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/socks5/data.txt",
 
         # 25. proxygenerator1 (583.4ms Fastest)

@@ -36,59 +36,70 @@ class ProxyScraper:
     ) -> List[Proxy]:
         """Fetch raw content from a single URL and parse proxies."""
         proxies: List[Proxy] = []
-        try:
-            timeout = aiohttp.ClientTimeout(total=config.SCRAPER_TIMEOUT)
-            headers = {"User-Agent": config.DEFAULT_USER_AGENT}
-            async with session.get(url, timeout=timeout, headers=headers) as response:
-                if response.status == 200:
-                    text = await response.text(errors="ignore")
+        timeout = aiohttp.ClientTimeout(total=config.SCRAPER_TIMEOUT)
+        headers = {"User-Agent": config.DEFAULT_USER_AGENT}
+        for attempt in range(2):
+            try:
+                async with session.get(url, timeout=timeout, headers=headers) as response:
+                    if response.status == 200:
+                        text = await response.text(errors="ignore")
 
-                    # Route through specialized HTML parser if applicable
-                    html_proxies = parse_html_source(url, text, self.protocol)
-                    if html_proxies is not None:
-                        proxies.extend(html_proxies)
+                        # Route through specialized HTML parser if applicable
+                        html_proxies = parse_html_source(url, text, self.protocol)
+                        if html_proxies is not None:
+                            proxies.extend(html_proxies)
+                        else:
+                            # 1. Automatic JSON payload extraction (e.g. Geonode, ProxyCompass, REST APIs)
+                            stripped = text.strip()
+                            if stripped.startswith("{") or stripped.startswith("["):
+                                try:
+                                    import json
+                                    json_data = json.loads(stripped)
+                                    items = []
+                                    if isinstance(json_data, dict):
+                                        items = json_data.get("data") or json_data.get("results") or json_data.get("proxies") or []
+                                        if not isinstance(items, list):
+                                            items = [json_data]
+                                    elif isinstance(json_data, list):
+                                        items = json_data
+
+                                    for item in items:
+                                        if isinstance(item, dict):
+                                            ip = item.get("ip") or item.get("ip_address") or item.get("host")
+                                            port_raw = item.get("port")
+                                            if ip and port_raw:
+                                                try:
+                                                    port = int(port_raw)
+                                                    if 1 <= port <= 65535:
+                                                        proxies.append(Proxy(host=str(ip).strip(), port=port, protocol=self.protocol))
+                                                except (ValueError, TypeError):
+                                                    pass
+                                except Exception:
+                                    pass
+
+                            # 2. Text-based IP:Port extraction (standard raw feeds and txt/csv dumps)
+                            if not proxies:
+                                matches = IP_PORT_PATTERN.findall(text)
+                                for ip, port_str in matches:
+                                    port = int(port_str)
+                                    if 1 <= port <= 65535:
+                                        proxies.append(
+                                            Proxy(host=ip, port=port, protocol=self.protocol)
+                                        )
+                        break
+                    elif response.status in (429, 503) and attempt == 0:
+                        # Rate-limit hit: back off and retry once
+                        await asyncio.sleep(1.2)
+                        continue
                     else:
-                        # 1. Automatic JSON payload extraction (e.g. Geonode, ProxyCompass, REST APIs)
-                        stripped = text.strip()
-                        if stripped.startswith("{") or stripped.startswith("["):
-                            try:
-                                import json
-                                json_data = json.loads(stripped)
-                                items = []
-                                if isinstance(json_data, dict):
-                                    items = json_data.get("data") or json_data.get("results") or json_data.get("proxies") or []
-                                    if not isinstance(items, list):
-                                        items = [json_data]
-                                elif isinstance(json_data, list):
-                                    items = json_data
-
-                                for item in items:
-                                    if isinstance(item, dict):
-                                        ip = item.get("ip") or item.get("ip_address") or item.get("host")
-                                        port_raw = item.get("port")
-                                        if ip and port_raw:
-                                            try:
-                                                port = int(port_raw)
-                                                if 1 <= port <= 65535:
-                                                    proxies.append(Proxy(host=str(ip).strip(), port=port, protocol=self.protocol))
-                                            except (ValueError, TypeError):
-                                                pass
-                            except Exception:
-                                pass
-
-                        # 2. Text-based IP:Port extraction (standard raw feeds and txt/csv dumps)
-                        if not proxies:
-                            matches = IP_PORT_PATTERN.findall(text)
-                            for ip, port_str in matches:
-                                port = int(port_str)
-                                if 1 <= port <= 65535:
-                                    proxies.append(
-                                        Proxy(host=ip, port=port, protocol=self.protocol)
-                                    )
-                else:
-                    logger.debug(f"Source returned HTTP {response.status}: {url}")
-        except Exception as e:
-            logger.debug(f"Failed to scrape source {url}: {e}")
+                        logger.debug(f"Source returned HTTP {response.status}: {url}")
+                        break
+            except Exception as e:
+                if attempt == 0:
+                    await asyncio.sleep(0.5)
+                    continue
+                logger.debug(f"Failed to scrape source {url}: {e}")
+                break
 
         if on_source_done:
             on_source_done(url, len(proxies))
