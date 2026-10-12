@@ -108,7 +108,9 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 26. proxy-daily.com (Export API - 183ms Fastest)
         "https://proxy-daily.com/api/export_proxies_ip_port?protocol=https",
 
-        # 27. proxyscrape.com (Live Public API v2 - 277ms Fastest)
+        # 27. proxyscrape.com (Official Live Public API v4 & v2 - High Density Verified)
+        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=http&timeout=5000",
+        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=http&anonymity=elite,anonymous&timeout=5000",
         "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=5000&country=all",
 
         # 28. spys.me (Direct Feed)
@@ -133,6 +135,19 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
 
         # 34. mmpx12
         "https://raw.githubusercontent.com/mmpx12/proxy-list/master/http.txt",
+
+        # 35. openproxylist.xyz (6,000+ Fresh Tested HTTP Proxies)
+        "https://openproxylist.xyz/http.txt",
+
+        # 36. proxifly (5,200+ Verified HTTP Proxies - 5-min Refresh)
+        "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/http/data.txt",
+
+        # 37. databay-labs (6,500+ Tested HTTP/HTTPS Proxies)
+        "https://raw.githubusercontent.com/databay-labs/free-proxy-list/master/http.txt",
+        "https://raw.githubusercontent.com/databay-labs/free-proxy-list/master/https.txt",
+
+        # 38. ErcinDedeoglu (64,000+ Active Worldwide Proxies)
+        "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/http.txt",
     ],
     ProxyProtocol.SOCKS4: [
         # --- Tier 1: Real-Time Verified Champions (Strictly Ranked by <= 700ms Density) ---
@@ -195,7 +210,8 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 18. Geonode Public REST API (376.4ms Fastest)
         "https://proxylist.geonode.com/api/proxy-list?protocols=socks4&limit=500&page=1&sort_by=lastChecked&sort_type=desc",
 
-        # 19. proxyscrape.com (Live Public API v2 - 412.5ms Fastest)
+        # 19. proxyscrape.com (Official Live Public API v4 & v2 - 412.5ms Fastest)
+        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=socks4&timeout=5000",
         "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4&timeout=5000&country=all",
 
         # 20. socks-proxy.net (300 Dedicated Verified SOCKS4 Proxies - 272.7ms Fastest)
@@ -250,6 +266,12 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
 
         # 36. advanced.name
         "https://advanced.name/freeproxy?type=socks4&page=1",
+
+        # 37. openproxylist.xyz SOCKS4 (3,900+ Dedicated SOCKS4 Proxies)
+        "https://openproxylist.xyz/socks4.txt",
+
+        # 38. ErcinDedeoglu SOCKS4 (22,000+ Active SOCKS4 Proxies)
+        "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/socks4.txt",
     ],
     ProxyProtocol.SOCKS5: [
         # --- Tier 1: Real-Time Verified Champions (Strictly Ranked by <= 700ms Density) ---
@@ -326,7 +348,9 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 22. spys.me (511.3ms Fastest)
         "https://spys.me/socks.txt",
 
-        # 23. proxyscrape.com (Live Public API v2 - 570.4ms Fastest)
+        # 23. proxyscrape.com (Official Live Public API v4 & v2 - 1,240+ Live SOCKS5 Proxies)
+        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=socks5&timeout=5000",
+        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=socks5&anonymity=elite,anonymous&timeout=5000",
         "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks5&timeout=5000&country=all",
 
         # 24. proxifly SOCKS5 (14/30 Alive - 586.7ms Fastest - 51,000 Proxies)
@@ -361,6 +385,15 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
 
         # 33. advanced.name
         "https://advanced.name/freeproxy?type=socks5&page=1",
+
+        # 34. openproxylist.xyz SOCKS5 (5,000+ Dedicated SOCKS5 Proxies)
+        "https://openproxylist.xyz/socks5.txt",
+
+        # 35. iplocate SOCKS5 (1,160+ Verified Anonymous SOCKS5)
+        "https://raw.githubusercontent.com/iplocate/free-proxy-list/main/protocols/socks5.txt",
+
+        # 36. ErcinDedeoglu SOCKS5 (73,000+ Worldwide SOCKS5 Proxies)
+        "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/socks5.txt",
     ],
 }
 
