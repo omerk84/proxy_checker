@@ -70,15 +70,28 @@
 ---
 
 
-## 💻 הפעלה
+## 💻 הפעלה על כל מחשב Windows
 
-### הרצה מהירה (Windows):
-לחץ פעמיים על:
+### 1. דרישת קדם יחידה (Prerequisites):
+- ודא שמותקן במחשב **Python 3.10 ומעלה** (ניתן להוריד מ-[python.org](https://www.python.org/downloads/)).
+- ⚠️ **קריטי בעת התקנת Python**: הקפד לסמן ב-V את האפשרות **`Add python.exe to PATH`**.
+
+### 2. הפעלה אוטומטית (לחיצה כפולה):
+לחץ פעמיים על הקובץ:
 ```cmd
 run.bat
 ```
+> **מה `run.bat` מבצע אוטומטית בפעם הראשונה?**
+> 1. מזהה את מנוע ה-Python של המערכת.
+> 2. יוצר סביבה וירטואלית מבודדת (`.venv`).
+> 3. מתקין באופן אוטומטי את כל הספריות הנדרשות מ-[requirements.txt](requirements.txt) (`aiohttp`, `aiohttp-socks`, `rich`).
+> 4. מפעיל את ממשק התוכנה בצורה שקופה וחלקה!
 
-### הרצה ישירה בטרמינל:
+---
+
+### הרצה ידנית בטרמינל (למפתחים):
 ```powershell
+python -m venv .venv
+.\.venv\Scripts\pip install -r requirements.txt
 .\.venv\Scripts\python.exe main.py
 ```
