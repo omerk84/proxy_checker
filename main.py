@@ -28,6 +28,33 @@ if sys.platform == "win32":
         _ProactorBasePipeTransport._call_connection_lost = _safe_call_connection_lost
     except Exception:
         pass
+# Automatic dependency validator: installs any missing packages into current Python
+def _ensure_dependencies():
+    missing = []
+    try:
+        import aiohttp
+    except ImportError:
+        missing.append("aiohttp>=3.9.3")
+    try:
+        import aiohttp_socks
+    except ImportError:
+        missing.append("aiohttp-socks>=0.8.4")
+    try:
+        import rich
+    except ImportError:
+        missing.append("rich>=13.7.1")
+
+    if missing:
+        import subprocess
+        print(f"[*] Missing dependencies detected in current Python environment: {missing}")
+        print("[*] Installing required packages automatically via pip...")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", *missing])
+            print("[+] Dependencies successfully installed!\n")
+        except Exception as e:
+            print(f"[!] Warning: automatic installation encountered an error: {e}")
+
+_ensure_dependencies()
 
 from core.models import Proxy, ProxyProtocol, ProxyStatus
 from core.scraper import ProxyScraper

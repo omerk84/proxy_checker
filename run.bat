@@ -8,68 +8,74 @@ echo   Proxy Scraper and Checker - Startup
 echo ===================================================
 echo.
 
-REM 1. Check if Python is installed and available in PATH
-set "PYTHON_EXE="
-
+REM 1. Find Python executable (python or py)
+set "PYTHON_CMD="
 where python >nul 2>nul
-if %errorlevel% equ 0 set "PYTHON_EXE=python"
+if %errorlevel% equ 0 set "PYTHON_CMD=python"
 
-if not defined PYTHON_EXE (
+if not defined PYTHON_CMD (
     where py >nul 2>nul
-    if %errorlevel% equ 0 set "PYTHON_EXE=py"
+    if %errorlevel% equ 0 set "PYTHON_CMD=py"
 )
 
-if not defined PYTHON_EXE (
+if not defined PYTHON_CMD (
     echo [ERROR] Python is not installed or not in your PATH!
-    echo.
-    echo Please install Python 3.10 or newer from https://www.python.org/downloads/
-    echo IMPORTANT: During installation, make sure to check "Add python.exe to PATH".
+    echo Please install Python 3.10+ from https://www.python.org/downloads/
+    echo IMPORTANT: Make sure to check "Add python.exe to PATH" during installation.
     echo.
     goto :FAIL
 )
 
-REM 2. Validate if virtual environment exists and is healthy
-set "REBUILD_VENV=0"
+REM 2. Check if System Python already has requirements installed
+%PYTHON_CMD% -c "import aiohttp, aiohttp_socks, rich" >nul 2>nul
+if %errorlevel% equ 0 (
+    echo [+] Dependencies verified in system Python.
+    goto :LAUNCH_SYS
+)
 
-if not exist ".venv\Scripts\python.exe" (
-    set "REBUILD_VENV=1"
-) else (
+REM 3. Check if local .venv exists and has dependencies
+if exist ".venv\Scripts\python.exe" (
     .\.venv\Scripts\python.exe -c "import aiohttp, aiohttp_socks, rich" >nul 2>nul
-    if %errorlevel% neq 0 (
-        echo [!] Existing virtual environment is invalid or missing packages.
-        echo Re-creating clean environment for this machine...
-        rmdir /s /q .venv >nul 2>nul
-        set "REBUILD_VENV=1"
+    if %errorlevel% equ 0 (
+        echo [+] Dependencies verified in .venv.
+        goto :LAUNCH_VENV
     )
 )
 
-if "%REBUILD_VENV%"=="0" goto :LAUNCH
-
-REM 3. Create fresh virtual environment and install packages
-echo [*] Creating virtual environment...
-%PYTHON_EXE% -m venv .venv
-if not exist ".venv\Scripts\python.exe" (
-    echo [ERROR] Failed to create .venv using %PYTHON_EXE%!
-    goto :FAIL
+REM 4. If neither has dependencies, try installing cleanly
+echo [*] Setting up dependencies...
+if exist ".venv" rmdir /s /q .venv >nul 2>nul
+%PYTHON_CMD% -m venv .venv 2>nul
+if exist ".venv\Scripts\python.exe" (
+    echo [*] Installing required packages into .venv...
+    .\.venv\Scripts\python.exe -m pip install --upgrade pip >nul 2>nul
+    .\.venv\Scripts\pip.exe install -r requirements.txt
+    if %errorlevel% equ 0 goto :LAUNCH_VENV
 )
 
-echo [*] Installing dependencies from requirements.txt...
-.\.venv\Scripts\python.exe -m pip install --upgrade pip >nul 2>nul
-.\.venv\Scripts\pip.exe install -r requirements.txt
-if %errorlevel% neq 0 (
-    echo [ERROR] Failed to install dependencies! Please check your internet connection.
-    goto :FAIL
-)
-echo [+] Environment setup complete!
-echo.
+echo [*] Installing required packages into system Python...
+%PYTHON_CMD% -m pip install -r requirements.txt
+if %errorlevel% equ 0 goto :LAUNCH_SYS
 
-:LAUNCH
-echo [*] Starting Proxy Scraper and Checker...
+echo [!] Pip install via requirements failed. Attempting direct launch with auto-installer...
+goto :LAUNCH_SYS
+
+:LAUNCH_VENV
+echo [*] Launching application via virtual environment...
 echo.
 .\.venv\Scripts\python.exe main.py
+goto :END
+
+:LAUNCH_SYS
+echo [*] Launching application via Python...
+echo.
+%PYTHON_CMD% main.py
+goto :END
+
+:END
 if %errorlevel% neq 0 (
     echo.
-    echo [!] Program finished with exit code %errorlevel%.
+    echo [!] Program exited with code %errorlevel%.
 )
 echo.
 pause
@@ -77,6 +83,6 @@ exit /b 0
 
 :FAIL
 echo.
-echo Setup cannot continue. Press any key to close this window.
+echo Press any key to close this window.
 pause
 exit /b 1
