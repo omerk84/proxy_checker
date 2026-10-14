@@ -204,9 +204,6 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 16. Zaeem20 (3/30 <= 700ms - 237.0ms Fastest)
         "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks4.txt",
 
-        # 17. proxydb.net (300ms Fastest)
-        "http://proxydb.net/?protocol=socks4&offset=0",
-
         # 18. Geonode Public REST API (376.4ms Fastest)
         "https://proxylist.geonode.com/api/proxy-list?protocols=socks4&limit=500&page=1&sort_by=lastChecked&sort_type=desc",
 

@@ -2,23 +2,23 @@
 setlocal
 title Proxy Scraper and Checker
 
-REM Force UTF-8 terminal code page and Python UTF-8 environment for clean styling & boxes
+REM Force UTF-8 terminal code page and Python UTF-8 environment
 chcp 65001 >nul 2>nul
 set "PYTHONIOENCODING=utf-8"
 set "PYTHONUTF8=1"
 
 cd /d "%~dp0"
 
-echo ===================================================
-echo   Proxy Scraper and Checker - Startup
-echo ===================================================
-echo.
+REM 1. Fast path: If local .venv already exists, launch immediately with zero overhead!
+if exist ".venv\Scripts\python.exe" (
+    .\.venv\Scripts\python.exe main.py
+    goto :END
+)
 
-REM 1. Find Python executable (python or py)
+REM 2. Find Python executable on system
 set "PYTHON_CMD="
 where python >nul 2>nul
 if %errorlevel% equ 0 set "PYTHON_CMD=python"
-
 if not defined PYTHON_CMD (
     where py >nul 2>nul
     if %errorlevel% equ 0 set "PYTHON_CMD=py"
@@ -32,51 +32,31 @@ if not defined PYTHON_CMD (
     goto :FAIL
 )
 
-REM 2. Check if System Python already has requirements installed
+REM 3. If system Python already has requirements, launch directly
 %PYTHON_CMD% -c "import aiohttp, aiohttp_socks, rich" >nul 2>nul
 if %errorlevel% equ 0 (
-    echo [+] Dependencies verified in system Python.
-    goto :LAUNCH_SYS
+    %PYTHON_CMD% main.py
+    goto :END
 )
 
-REM 3. Check if local .venv exists and has dependencies
-if exist ".venv\Scripts\python.exe" (
-    .\.venv\Scripts\python.exe -c "import aiohttp, aiohttp_socks, rich" >nul 2>nul
-    if %errorlevel% equ 0 (
-        echo [+] Dependencies verified in .venv.
-        goto :LAUNCH_VENV
-    )
-)
-
-REM 4. If neither has dependencies, try installing cleanly
-echo [*] Setting up dependencies...
-if exist ".venv" rmdir /s /q .venv >nul 2>nul
-%PYTHON_CMD% -m venv .venv 2>nul
-if exist ".venv\Scripts\python.exe" (
-    echo [*] Installing required packages into .venv...
-    .\.venv\Scripts\python.exe -m pip install --upgrade pip >nul 2>nul
-    .\.venv\Scripts\pip.exe install -r requirements.txt
-    if %errorlevel% equ 0 goto :LAUNCH_VENV
-)
-
-echo [*] Installing required packages into system Python...
+REM 4. Setup requirements once
+echo [*] Installing requirements from requirements.txt...
 %PYTHON_CMD% -m pip install -r requirements.txt
-if %errorlevel% equ 0 goto :LAUNCH_SYS
+if %errorlevel% equ 0 (
+    %PYTHON_CMD% main.py
+    goto :END
+)
 
-echo [!] Pip install via requirements failed. Attempting direct launch with auto-installer...
-goto :LAUNCH_SYS
+echo [!] Could not install requirements into system Python. Creating .venv...
+%PYTHON_CMD% -m venv .venv
+if exist ".venv\Scripts\python.exe" (
+    .\.venv\Scripts\pip.exe install -r requirements.txt
+    .\.venv\Scripts\python.exe main.py
+    goto :END
+)
 
-:LAUNCH_VENV
-echo [*] Launching application via virtual environment...
-echo.
-.\.venv\Scripts\python.exe main.py
-goto :END
-
-:LAUNCH_SYS
-echo [*] Launching application via Python...
-echo.
-%PYTHON_CMD% main.py
-goto :END
+echo [ERROR] Failed to prepare Python environment.
+goto :FAIL
 
 :END
 if %errorlevel% neq 0 (

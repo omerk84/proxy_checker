@@ -49,42 +49,13 @@ if sys.platform == "win32":
         _ProactorBasePipeTransport._call_connection_lost = _safe_call_connection_lost
     except Exception:
         pass
-# Automatic dependency validator: installs any missing packages into current Python
-def _ensure_dependencies():
-    missing = []
-    try:
-        import aiohttp
-    except ImportError:
-        missing.append("aiohttp>=3.9.3")
-    try:
-        import aiohttp_socks
-    except ImportError:
-        missing.append("aiohttp-socks>=0.8.4")
-    try:
-        import rich
-    except ImportError:
-        missing.append("rich>=13.7.1")
-
-    if missing:
-        import subprocess
-        print(f"[*] Missing dependencies detected in current Python environment: {missing}")
-        print("[*] Installing required packages automatically via pip...")
-        try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", *missing])
-            print("[+] Dependencies successfully installed!\n")
-        except Exception as e:
-            print(f"[!] Warning: automatic installation encountered an error: {e}")
-
-_ensure_dependencies()
-
 from core.models import Proxy, ProxyProtocol, ProxyStatus
 from core.scraper import ProxyScraper
 from core.checker import ProxyChecker
 from utils.storage import ProxyStorage
 from utils.display import (
     show_banner,
-    prompt_protocol,
-    prompt_timeout,
+    prompt_initial_config,
     prompt_checker_options,
     show_summary_and_top_proxies,
     create_scrape_progress,
@@ -145,18 +116,17 @@ def get_local_public_ip() -> Optional[str]:
 async def run_pipeline():
     show_banner()
 
-    # 1. Step 1: User selects proxy protocol & latency timeout
-    protocol = prompt_protocol()
-    timeout_ms = prompt_timeout()
+    # 1. Step 1: User selects proxy protocol & a single unified Max Latency MS
+    protocol, max_latency_ms = prompt_initial_config()
 
     console.print(
         f"\n[bold green][+] Starting scraper for [bold yellow]{protocol.value.upper()}[/bold yellow] "
-        f"(ProxyScrape API timeout: [bold yellow]{timeout_ms}ms[/bold yellow])...[/bold green]"
+        f"(Unified Max Latency: [bold yellow]{int(max_latency_ms)}ms[/bold yellow])...[/bold green]"
     )
     console.print("[dim yellow]  (Tip: Press 'f' (Finish), 'q', [Enter] or Ctrl+C at any time to finish scraping early)[/dim yellow]\n")
 
-    # 2. Step 2: Scrape all available proxies for this protocol
-    scraper = ProxyScraper(protocol=protocol, timeout_ms=timeout_ms)
+    # 2. Step 2: Scrape all available proxies for this protocol (ProxyScrape API filters server-side by max_latency_ms)
+    scraper = ProxyScraper(protocol=protocol, timeout_ms=int(max_latency_ms))
     scraped_proxies: List[Proxy] = []
 
     controller = EarlyFinishController()
@@ -199,10 +169,8 @@ async def run_pipeline():
         console.print("[bold red]No candidate proxies were found from sources. Exiting.[/bold red]")
         return
 
-    # 4. Step 4: Prompt user for Max MS latency filter, Threads, Retries, and test limit
-    max_latency_ms, concurrency, max_to_check, retries = prompt_checker_options(
-        total_scraped, default_max_ms=float(timeout_ms)
-    )
+    # 4. Step 4: Prompt user for Concurrency, Retries, and test limit (reusing unified max_latency_ms)
+    concurrency, max_to_check, retries = prompt_checker_options(total_scraped, max_latency_ms)
 
     candidates_to_check = scraped_proxies[:max_to_check]
 

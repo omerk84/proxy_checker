@@ -81,10 +81,11 @@ def show_banner():
     console.print()
 
 
-def prompt_protocol() -> ProxyProtocol:
+def prompt_initial_config() -> Tuple[ProxyProtocol, float]:
     """
-    Step 1: Displays the interactive protocol selection menu.
-    Returns: selected ProxyProtocol
+    Step 1: Displays the protocol selection menu and asks for a single unified Max MS Latency.
+    This latency value is used both to filter ProxyScrape's live API during scraping
+    and to benchmark/filter proxies during the health check.
     """
     menu = Table(show_header=True, header_style="bold magenta", border_style="cyan", box=box.ROUNDED)
     menu.add_column("Option", style="bold yellow", width=8, justify="center")
@@ -98,42 +99,41 @@ def prompt_protocol() -> ProxyProtocol:
     console.print(menu)
     console.print()
 
+    selected_protocol: ProxyProtocol
     while True:
         choice = console.input("[bold cyan]  [?] Select proxy protocol [1/2/3] (default 1): [/bold cyan]").strip()
         if not choice:
             choice = "1"
         try:
-            return ProxyProtocol.from_choice(choice)
+            selected_protocol = ProxyProtocol.from_choice(choice)
+            break
         except ValueError:
             console.print("[bold red]  [!] Invalid option. Please choose 1, 2, or 3.[/bold red]\n")
 
-
-def prompt_timeout() -> int:
-    """
-    Step 1b: Displays the latency threshold / timeout prompt for ProxyScrape API and testing.
-    Returns: timeout in milliseconds (default 2000 ms, e.g. 2044)
-    """
-    timeout_input = console.input(
-        "[bold cyan]  [?] Latency Timeout in MS for ProxyScrape API & Testing (e.g. 2044, default 2000): [/bold cyan]"
+    console.print()
+    latency_input = console.input(
+        "[bold cyan]  [?] Max MS Latency (e.g. 1000 for <=1000ms, Enter for 2000ms): [/bold cyan]"
     ).strip()
     try:
-        val = int(timeout_input)
-        if val > 0:
-            return val
+        max_ms = float(latency_input) if latency_input else 2000.0
+        if max_ms <= 0:
+            max_ms = 2000.0
     except ValueError:
-        pass
-    return 2000
+        max_ms = 2000.0
+
+    return selected_protocol, max_ms
 
 
-def prompt_checker_options(total_scraped: int, default_max_ms: float = 2000.0) -> Tuple[float, int, int, int]:
+def prompt_checker_options(total_scraped: int, max_latency_ms: float) -> Tuple[int, int, int]:
     """
-    Step 2 (after scraping finishes): Prompts user for Max MS latency, Concurrency, and Retries.
-    Returns: (max_latency_ms, concurrency, max_to_check, retries)
+    Step 2 (after scraping finishes): Prompts user for Concurrency, Retries, and Candidate Limit.
+    Reuses the single unified Max MS latency established in Step 1.
+    Returns: (concurrency, max_to_check, retries)
     """
     console.print()
     console.print(Panel(
         f"  Total proxies scraped & ready to test: [bold green]{total_scraped:,}[/bold green]\n"
-        f"  Active Latency Filter: [bold yellow]<={int(default_max_ms)} ms[/bold yellow] (from Step 1)\n"
+        f"  Active Max Latency Filter: [bold yellow]<={int(max_latency_ms)} ms[/bold yellow]\n"
         f"  [dim]Configure thread concurrency and retries below:[/dim]",
         title="[bold yellow]  Configure Checker Parameters  [/bold yellow]",
         border_style="yellow",
@@ -142,18 +142,7 @@ def prompt_checker_options(total_scraped: int, default_max_ms: float = 2000.0) -
     ))
     console.print()
 
-    # 1. Max MS Prompt
-    max_ms_input = console.input(
-        f"[bold cyan]  [?] Max MS Latency [Enter for {int(default_max_ms)}ms]: [/bold cyan]"
-    ).strip()
-    try:
-        max_ms = float(max_ms_input) if max_ms_input else float(default_max_ms)
-    except ValueError:
-        max_ms = float(default_max_ms)
-
-    console.print()
-
-    # 2. Concurrency (Threads) Prompt
+    # 1. Concurrency (Threads) Prompt
     threads_input = console.input(
         f"[bold cyan]  [?] Threads / Concurrency [Enter for {config.DEFAULT_CONCURRENCY}]: [/bold cyan]"
     ).strip()
@@ -161,7 +150,7 @@ def prompt_checker_options(total_scraped: int, default_max_ms: float = 2000.0) -
 
     console.print()
 
-    # 3. Retries for failed proxies
+    # 2. Retries for failed proxies
     retries_input = console.input(
         "[bold cyan]  [?] Retries on failure [0 for fastest, 1 for second-chance retry] (default 1): [/bold cyan]"
     ).strip()
@@ -169,14 +158,14 @@ def prompt_checker_options(total_scraped: int, default_max_ms: float = 2000.0) -
 
     console.print()
 
-    # 4. Candidate limit prompt
+    # 3. Candidate limit prompt
     limit_input = console.input(
         f"[bold cyan]  [?] How many proxies to test? [Enter for ALL ({total_scraped:,}), or enter a number, e.g. 1000]: [/bold cyan]"
     ).strip()
     max_to_check = int(limit_input) if limit_input.isdigit() and int(limit_input) > 0 else total_scraped
 
     console.print()
-    return max_ms, concurrency, max_to_check, retries
+    return concurrency, max_to_check, retries
 
 
 

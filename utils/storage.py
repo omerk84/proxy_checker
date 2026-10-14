@@ -1,10 +1,8 @@
 """
 File export and persistence utilities for verified proxies.
 """
-import json
-from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Optional
 
 import config
 from core.models import Proxy, ProxyProtocol, ProxyStatus
