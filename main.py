@@ -49,6 +49,22 @@ if sys.platform == "win32":
         _ProactorBasePipeTransport._call_connection_lost = _safe_call_connection_lost
     except Exception:
         pass
+
+# Verify critical third-party dependencies before importing core modules
+try:
+    import aiohttp
+    import aiohttp_socks
+    import rich
+except ImportError as _import_err:
+    _missing = getattr(_import_err, "name", "required dependency")
+    print("\n" + "=" * 76)
+    print(f"[!] APPLICATION STARTUP ERROR: Missing Python package '{_missing}'")
+    print(f"    Running with Python executable: {sys.executable}")
+    print("\n    To install all requirements into this specific Python engine, run in CMD:")
+    print(f"        \"{sys.executable}\" -m pip install -r requirements.txt")
+    print("=" * 76 + "\n")
+    sys.exit(1)
+
 from core.models import Proxy, ProxyProtocol, ProxyStatus
 from core.scraper import ProxyScraper
 from core.checker import ProxyChecker
