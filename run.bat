@@ -32,30 +32,22 @@ if not defined PYTHON_CMD (
     goto :FAIL
 )
 
-REM 3. If system Python already has requirements, launch directly
+REM 3. If system Python already has requirements, launch directly with zero overhead!
 %PYTHON_CMD% -c "import aiohttp, aiohttp_socks, rich" >nul 2>nul
 if %errorlevel% equ 0 (
     %PYTHON_CMD% main.py
     goto :END
 )
 
-REM 4. Setup requirements once
-echo [*] Installing requirements from requirements.txt...
-%PYTHON_CMD% -m pip install -r requirements.txt
-if %errorlevel% equ 0 (
-    %PYTHON_CMD% main.py
-    goto :END
-)
-
-echo [!] Could not install requirements into system Python. Creating .venv...
-%PYTHON_CMD% -m venv .venv
-if exist ".venv\Scripts\python.exe" (
-    .\.venv\Scripts\pip.exe install -r requirements.txt
-    .\.venv\Scripts\python.exe main.py
-    goto :END
-)
-
-echo [ERROR] Failed to prepare Python environment.
+REM 4. Requirements are missing: Show clean instruction to user instead of slow auto-install loop
+echo ===============================================================================
+echo [!] Missing required Python libraries (aiohttp, aiohttp-socks, python-socks, rich).
+echo.
+echo To install all requirements at once, open CMD in this folder and run:
+echo.
+echo     %PYTHON_CMD% -m pip install -r requirements.txt
+echo.
+echo ===============================================================================
 goto :FAIL
 
 :END
