@@ -84,6 +84,7 @@ from utils.storage import ProxyStorage
 from utils.display import (
     show_banner,
     prompt_protocol,
+    prompt_timeout,
     prompt_checker_options,
     show_summary_and_top_proxies,
     create_scrape_progress,
@@ -144,16 +145,18 @@ def get_local_public_ip() -> Optional[str]:
 async def run_pipeline():
     show_banner()
 
-    # 1. Step 1: User selects proxy protocol
+    # 1. Step 1: User selects proxy protocol & latency timeout
     protocol = prompt_protocol()
+    timeout_ms = prompt_timeout()
 
     console.print(
-        f"\n[bold green][+] Starting scraper for [bold yellow]{protocol.value.upper()}[/bold yellow]...[/bold green]"
+        f"\n[bold green][+] Starting scraper for [bold yellow]{protocol.value.upper()}[/bold yellow] "
+        f"(ProxyScrape API timeout: [bold yellow]{timeout_ms}ms[/bold yellow])...[/bold green]"
     )
     console.print("[dim yellow]  (Tip: Press 'f' (Finish), 'q', [Enter] or Ctrl+C at any time to finish scraping early)[/dim yellow]\n")
 
     # 2. Step 2: Scrape all available proxies for this protocol
-    scraper = ProxyScraper(protocol=protocol)
+    scraper = ProxyScraper(protocol=protocol, timeout_ms=timeout_ms)
     scraped_proxies: List[Proxy] = []
 
     controller = EarlyFinishController()
@@ -163,7 +166,7 @@ async def run_pipeline():
         with create_scrape_progress() as progress:
             scrape_task = progress.add_task(
                 f"Scraping {protocol.value.upper()} sources...",
-                total=len(scraper.sources),
+                total=scraper.total_sources_count,
             )
 
             def on_source_done(url: str, count: int):
@@ -197,7 +200,9 @@ async def run_pipeline():
         return
 
     # 4. Step 4: Prompt user for Max MS latency filter, Threads, Retries, and test limit
-    max_latency_ms, concurrency, max_to_check, retries = prompt_checker_options(total_scraped)
+    max_latency_ms, concurrency, max_to_check, retries = prompt_checker_options(
+        total_scraped, default_max_ms=float(timeout_ms)
+    )
 
     candidates_to_check = scraped_proxies[:max_to_check]
 

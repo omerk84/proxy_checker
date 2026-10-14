@@ -42,9 +42,10 @@
 11. **Monosans/Proxy-List (Hourly Latency-Sorted Feed)**:
     - מאגר מנוטר ברמת Rust, מתעדכן בכל שעה וממוין מראש לפי Latency.
     - שיעור שרידות: **56.0%**.
-12. **ProxyScrape API v4 & v2 (Official Live REST APIs)**:
-    - חיבור ישיר ורציף ל-API הרשמי v4 ו-v2 של ProxyScrape עם פילטור לפי פרוטוקולים ורמות אנונימיות (`elite`, `anonymous`).
-    - שיעור שרידות: **68.0% - 78.0%**, זמן תגובה ממוצע 207ms.
+12. **ProxyScrape API v4 (Official Dynamic Live REST API)**:
+    - חיבור ישיר, דינמי ומוביל לקצה הרשמי של ProxyScrape v4 עם התאמה אוטומטית של הפרמטרים (`protocol`, `timeout`, `format=text`, `proxy_format=ipport`) לפי בחירת המשתמש.
+    - מפענח טקסט Raw מובנה וחסין (Ultra-Robust Parser) הכולל סינון כתובות פרטיות/מקומיות, וידוא טווח פורטים תקין (1-65535) ומיקום בראש תור הבדיקה.
+    - שיעור שרידות: **80.0%**, זמן תגובה ממוצע 300ms.
 13. **OpenProxyList (`openproxylist.xyz`) & Proxifly REST Feeds**:
     - פידים חיים המתעדכנים כל מספר דקות עם עשרות אלפי פרוקסים מנוטרים (HTTP, SOCKS4, SOCKS5).
 14. **Tier-1 Health-Checked Feeds & Databay Labs**:

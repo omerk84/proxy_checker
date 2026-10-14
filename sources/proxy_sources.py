@@ -11,9 +11,6 @@ from core.models import ProxyProtocol
 PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
     ProxyProtocol.HTTP: [
         # --- Tier 1: Ultra-Fast sub-200ms Verified Champions & REST APIs (Top Precedence) ---
-        # 1. proxyscrape.com (Official Live Public API v4 & v2 - Full Pool Unconstrained)
-        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=http",
-        "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&country=all",
 
         # 2. freeproxy.world (100% Alive Rate - 17.0ms Fastest - Multi-Page)
         "https://www.freeproxy.world/?type=http&page=1",
@@ -153,9 +150,6 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
     ],
     ProxyProtocol.SOCKS4: [
         # --- Tier 1: Real-Time Verified Champions (Strictly Ranked by <= 700ms Density) ---
-        # 1. proxyscrape.com (Official Live Public API v4 & v2 - Full Pool Unconstrained)
-        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=socks4",
-        "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4&country=all",
 
         # 2. vakhov/fresh-proxy-list (13/30 <= 700ms - Highest sub-700ms Density)
         "https://raw.githubusercontent.com/vakhov/fresh-proxy-list/master/socks4.txt",
@@ -280,9 +274,6 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
     ],
     ProxyProtocol.SOCKS5: [
         # --- Tier 1: Real-Time Verified Champions (Strictly Ranked by <= 700ms Density) ---
-        # 1. proxyscrape.com (Official Live Public API v4 & v2 - Full Pool Unconstrained - 2,400+ Live SOCKS5)
-        "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&protocol=socks5",
-        "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks5&country=all",
 
         # 2. proxmint (9/30 <= 700ms - 256.3ms Fastest! GitHub + Live API)
         "https://raw.githubusercontent.com/proxmint/free-proxy-list/main/proxies/socks5.txt",

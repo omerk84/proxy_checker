@@ -11,6 +11,7 @@ import aiohttp
 import config
 from core.models import Proxy, ProxyProtocol
 from sources.html_parsers import parse_html_source
+from sources.proxyscrape_api import fetch_dynamic_proxyscrape
 
 logger = logging.getLogger(__name__)
 
@@ -19,14 +20,22 @@ IP_PORT_PATTERN = re.compile(
     r"\b((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)):(\d{1,5})\b"
 )
 
+PROXY_SCRAPE_SOURCE_KEY = "https://api.proxyscrape.com/v4/free-proxy-list/get"
+
 
 class ProxyScraper:
     """Asynchronous engine for scraping and deduplicating proxies from various sources."""
 
-    def __init__(self, protocol: ProxyProtocol):
+    def __init__(self, protocol: ProxyProtocol, timeout_ms: int = 2000):
         from sources.proxy_sources import get_sources_for_protocol
         self.protocol = protocol
+        self.timeout_ms = timeout_ms
         self.sources = get_sources_for_protocol(protocol)
+
+    @property
+    def total_sources_count(self) -> int:
+        """Total number of sources including the dynamic ProxyScrape API."""
+        return len(self.sources) + 1
 
     async def _fetch_single_source(
         self,
@@ -119,11 +128,23 @@ class ProxyScraper:
         results_by_url: Dict[str, List[Proxy]] = {}
 
         connector = aiohttp.TCPConnector(ssl=False, limit=50)
+        async def _fetch_proxyscrape_wrapper() -> List[Proxy]:
+            try:
+                proxies = await fetch_dynamic_proxyscrape(self.protocol, self.timeout_ms, session)
+            except Exception as e:
+                logger.warning(f"Error fetching dynamic ProxyScrape API: {e}")
+                proxies = []
+            if on_source_done:
+                on_source_done(PROXY_SCRAPE_SOURCE_KEY, len(proxies))
+            return proxies
+
         async with aiohttp.ClientSession(connector=connector) as session:
             task_to_url = {
                 asyncio.create_task(self._fetch_single_source(session, url, on_source_done)): url
                 for url in self.sources
             }
+            # Enqueue the dynamic ProxyScrape v4 API task
+            task_to_url[asyncio.create_task(_fetch_proxyscrape_wrapper())] = PROXY_SCRAPE_SOURCE_KEY
 
             pending = set(task_to_url.keys())
             while pending and not (stop_event and stop_event.is_set()):
@@ -143,9 +164,18 @@ class ProxyScraper:
                     t.cancel()
                 await asyncio.gather(*pending, return_exceptions=True)
 
-        # Assemble unique_proxies strictly preserving self.sources quality precedence!
+        # Assemble unique_proxies strictly preserving source quality precedence!
         seen_addresses: Set[str] = set()
         unique_proxies: List[Proxy] = []
+
+        # 1. Top priority: Official ProxyScrape Dynamic API
+        if PROXY_SCRAPE_SOURCE_KEY in results_by_url:
+            for proxy in results_by_url[PROXY_SCRAPE_SOURCE_KEY]:
+                if proxy.address not in seen_addresses:
+                    seen_addresses.add(proxy.address)
+                    unique_proxies.append(proxy)
+
+        # 2. General Verified Sources
         for url in self.sources:
             if url in results_by_url:
                 for proxy in results_by_url[url]:

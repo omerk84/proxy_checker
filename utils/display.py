@@ -108,7 +108,24 @@ def prompt_protocol() -> ProxyProtocol:
             console.print("[bold red]  [!] Invalid option. Please choose 1, 2, or 3.[/bold red]\n")
 
 
-def prompt_checker_options(total_scraped: int) -> Tuple[float, int, int, int]:
+def prompt_timeout() -> int:
+    """
+    Step 1b: Displays the latency threshold / timeout prompt for ProxyScrape API and testing.
+    Returns: timeout in milliseconds (default 2000 ms, e.g. 2044)
+    """
+    timeout_input = console.input(
+        "[bold cyan]  [?] Latency Timeout in MS for ProxyScrape API & Testing (e.g. 2044, default 2000): [/bold cyan]"
+    ).strip()
+    try:
+        val = int(timeout_input)
+        if val > 0:
+            return val
+    except ValueError:
+        pass
+    return 2000
+
+
+def prompt_checker_options(total_scraped: int, default_max_ms: float = 2000.0) -> Tuple[float, int, int, int]:
     """
     Step 2 (after scraping finishes): Prompts user for Max MS latency, Concurrency, and Retries.
     Returns: (max_latency_ms, concurrency, max_to_check, retries)
@@ -116,7 +133,8 @@ def prompt_checker_options(total_scraped: int) -> Tuple[float, int, int, int]:
     console.print()
     console.print(Panel(
         f"  Total proxies scraped & ready to test: [bold green]{total_scraped:,}[/bold green]\n"
-        f"  [dim]Configure latency thresholds, thread concurrency, and retries below:[/dim]",
+        f"  Active Latency Filter: [bold yellow]<={int(default_max_ms)} ms[/bold yellow] (from Step 1)\n"
+        f"  [dim]Configure thread concurrency and retries below:[/dim]",
         title="[bold yellow]  Configure Checker Parameters  [/bold yellow]",
         border_style="yellow",
         box=box.ROUNDED,
@@ -126,12 +144,12 @@ def prompt_checker_options(total_scraped: int) -> Tuple[float, int, int, int]:
 
     # 1. Max MS Prompt
     max_ms_input = console.input(
-        "[bold cyan]  [?] Max MS Latency (e.g. 1000 for <=1000ms, Enter for 1000ms): [/bold cyan]"
+        f"[bold cyan]  [?] Max MS Latency [Enter for {int(default_max_ms)}ms]: [/bold cyan]"
     ).strip()
     try:
-        max_ms = float(max_ms_input) if max_ms_input else 1000.0
+        max_ms = float(max_ms_input) if max_ms_input else float(default_max_ms)
     except ValueError:
-        max_ms = 1000.0
+        max_ms = float(default_max_ms)
 
     console.print()
 
