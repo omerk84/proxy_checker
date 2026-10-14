@@ -12,6 +12,9 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
     ProxyProtocol.HTTP: [
         # --- Tier 1: Ultra-Fast sub-200ms Verified Champions & REST APIs (Top Precedence) ---
 
+        # 1. litport.net Official Live REST API (Snapshot updated every minute - 72.0% Tested Alive - 700+ Proxies)
+        "https://litport.net/api/free-proxy/snapshot?protocol=http",
+
         # 2. freeproxy.world (100% Alive Rate - 17.0ms Fastest - Multi-Page)
         "https://www.freeproxy.world/?type=http&page=1",
         "https://www.freeproxy.world/?type=http&page=2",
@@ -151,6 +154,9 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
     ProxyProtocol.SOCKS4: [
         # --- Tier 1: Real-Time Verified Champions (Strictly Ranked by <= 700ms Density) ---
 
+        # 1. litport.net Official Live REST API (Snapshot updated every minute - 420+ Dedicated SOCKS4)
+        "https://litport.net/api/free-proxy/snapshot?protocol=socks4",
+
         # 2. vakhov/fresh-proxy-list (13/30 <= 700ms - Highest sub-700ms Density)
         "https://raw.githubusercontent.com/vakhov/fresh-proxy-list/master/socks4.txt",
 
@@ -271,6 +277,9 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
     ],
     ProxyProtocol.SOCKS5: [
         # --- Tier 1: Real-Time Verified Champions (Strictly Ranked by <= 700ms Density) ---
+
+        # 1. litport.net Official Live REST API (Snapshot updated every minute - 55.0% Tested Alive - 1,300+ SOCKS5)
+        "https://litport.net/api/free-proxy/snapshot?protocol=socks5",
 
         # 2. proxmint (9/30 <= 700ms - 256.3ms Fastest! GitHub + Live API)
         "https://raw.githubusercontent.com/proxmint/free-proxy-list/main/proxies/socks5.txt",

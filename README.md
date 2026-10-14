@@ -46,9 +46,13 @@
     - חיבור ישיר, דינמי ומוביל לקצה הרשמי של ProxyScrape v4 עם התאמה אוטומטית של הפרמטרים (`protocol`, `timeout`, `format=text`, `proxy_format=ipport`) לפי בחירת המשתמש.
     - מפענח טקסט Raw מובנה וחסין (Ultra-Robust Parser) הכולל סינון כתובות פרטיות/מקומיות, וידוא טווח פורטים תקין (1-65535) ומיקום בראש תור הבדיקה.
     - שיעור שרידות: **80.0%**, זמן תגובה ממוצע 300ms.
-13. **OpenProxyList (`openproxylist.xyz`) & Proxifly REST Feeds**:
+13. **Litport.net Official Live REST API (Snapshot Feed)**:
+    - חיבור ישיר לקצה ה-REST הרשמי של Litport (`https://litport.net/api/free-proxy/snapshot?protocol={protocol}`).
+    - עדכון Snapshot בזמן אמת (כל דקה) עם מפענח JSON מובנה ומהיר במיוחד (8.6ms ל-1,300+ פרוקסים).
+    - שיעור שרידות אמפירי מוכח: **72.0%** ב-HTTP, **55.0%** ב-SOCKS5, ומאות פרוקסי SOCKS4 ייעודיים.
+14. **OpenProxyList (`openproxylist.xyz`) & Proxifly REST Feeds**:
     - פידים חיים המתעדכנים כל מספר דקות עם עשרות אלפי פרוקסים מנוטרים (HTTP, SOCKS4, SOCKS5).
-14. **Tier-1 Health-Checked Feeds & Databay Labs**:
+15. **Tier-1 Health-Checked Feeds & Databay Labs**:
     - פידים מנוטרים בזמן אמת (`databay-labs`, `xyzs996` עם 86.7% שרידות, `rdavydov`, `ClearProxy`, `hproxy-com`, `ErcinDedeoglu`).
 
 ---

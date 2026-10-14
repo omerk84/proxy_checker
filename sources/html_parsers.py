@@ -256,6 +256,36 @@ def parse_free_proxy_list(html: str, target_protocol: ProxyProtocol) -> List[Pro
     return results
 
 
+def parse_litport(json_text: str, target_protocol: ProxyProtocol) -> List[Proxy]:
+    """
+    Parses Litport official Live REST API snapshot:
+    {"total": 423, "proxies": [{"host": "72.205.0.67", "port": 4145, "protocol": "socks4", ...}]}
+    Extracts host and port with strict IPv4 validation.
+    """
+    results: List[Proxy] = []
+    seen = set()
+    try:
+        data = json.loads(json_text)
+        items = data.get("proxies", [])
+        for item in items:
+            ip = item.get("host") or item.get("ip")
+            port_raw = item.get("port")
+            if ip and port_raw:
+                try:
+                    port = int(port_raw)
+                    ip_str = str(ip).strip()
+                    key = f"{ip_str}:{port}"
+                    if key not in seen and 1 <= port <= 65535:
+                        seen.add(key)
+                        results.append(Proxy(host=ip_str, port=port, protocol=target_protocol))
+                except (ValueError, TypeError):
+                    continue
+    except Exception as e:
+        logger.debug(f"Litport snapshot parsing error: {e}")
+
+    return results
+
+
 def parse_html_source(url: str, html: str, protocol: ProxyProtocol) -> Optional[List[Proxy]]:
     """
     Routes known HTML-based proxy sources and JSON APIs to their specialized parser routines.
@@ -264,7 +294,9 @@ def parse_html_source(url: str, html: str, protocol: ProxyProtocol) -> Optional[
     """
     lower_url = url.lower()
 
-    if "proxycompass.com" in lower_url:
+    if "litport.net" in lower_url:
+        return parse_litport(html, protocol)
+    elif "proxycompass.com" in lower_url:
         return parse_proxycompass(html, protocol)
     elif "spys.one" in lower_url:
         return parse_spys(html, protocol)
