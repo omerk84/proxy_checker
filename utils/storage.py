@@ -38,8 +38,16 @@ class ProxyStorage:
         # Sort by latency ascending
         valid_proxies.sort(key=lambda p: p.latency_ms if p.latency_ms is not None else float("inf"))
 
+        # Deduplicate by address while preserving fastest latency entry
+        seen = set()
+        unique_valid = []
+        for p in valid_proxies:
+            if p.address not in seen:
+                seen.add(p.address)
+                unique_valid.append(p)
+
         # Write clean IP:Port list
-        content = "\n".join([p.address for p in valid_proxies]) + ("\n" if valid_proxies else "")
+        content = "\n".join([p.address for p in unique_valid]) + ("\n" if unique_valid else "")
         working_file.write_text(content, encoding="utf-8")
 
         return {"working": working_file}
