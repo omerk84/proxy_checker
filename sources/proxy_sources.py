@@ -2,8 +2,8 @@
 Curated list of public APIs and fresh raw repository sources for scraping proxies.
 All sources in this file are active, verified, and empirically benchmarked for <= 700ms latency.
 Sorted strictly by density of sub-700ms alive proxies and round-trip response time.
-Restored valid working repositories (casals-ar SOCKS4, roosterkid SOCKS4, TheSpeedX SOCKS4/SOCKS5/HTTP, sunny9577 HTTP).
-Cleaned of confirmed dead endpoints (e.g. socks-proxy.net from SOCKS5, dead proxy-list.org pages, empty dumps).
+Restored valid working repositories (casals-ar SOCKS4, roosterkid SOCKS4, TheSpeedX SOCKS4, sunny9577 HTTP).
+Cleaned of confirmed ghost endpoints with 0% alive rate (e.g. zevtyardt, ErcinDedeoglu, dead geonode feeds).
 """
 from typing import Dict, List
 from core.models import ProxyProtocol
@@ -97,59 +97,43 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 21. sunny9577 (Restored - 1,403 Proxies - 525.4ms Fastest)
         "https://raw.githubusercontent.com/sunny9577/proxy-scraper/master/generated/http_proxies.txt",
 
-        # 22. TheSpeedX HTTP (Restored - 2,842 Proxies - 166.4ms Fastest)
-        "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/http.txt",
-
-        # 23. r00tee Https (5,000 Proxies - 170.0ms Fastest)
+        # 22. r00tee Https (5,000 Proxies - 170.0ms Fastest)
         "https://raw.githubusercontent.com/r00tee/Proxy-List/main/Https.txt",
 
-        # 24. ClearProxy (Checked HTTP)
+        # 23. ClearProxy (Checked HTTP)
         "https://raw.githubusercontent.com/ClearProxy/checked-proxy-list/main/http/raw/all.txt",
 
-        # 25. Geonode Public REST API (Verified Latency Feed - 293ms Fastest)
-        "https://proxylist.geonode.com/api/proxy-list?protocols=http%2Chttps&limit=500&page=1&sort_by=lastChecked&sort_type=desc",
-
-        # 26. proxy-daily.com (Export API - 183ms Fastest)
+        # 24. proxy-daily.com (Export API - 183ms Fastest)
         "https://proxy-daily.com/api/export_proxies_ip_port?protocol=https",
 
-        # 27. spys.me (Direct Feed)
+        # 25. spys.me (Direct Feed)
         "https://spys.me/proxy.txt",
 
-        # 29. proxy-list.org (Working Pages)
+        # 26. proxy-list.org (Working Pages)
         "https://proxy-list.org/english/index.php?p=3&type=http",
         "https://proxy-list.org/english/index.php?p=5&type=http",
         "https://proxy-list.org/english/index.php?p=1&type=http",
 
-        # 30. xyzs996 Health-Checked List
+        # 27. xyzs996 Health-Checked List
         "https://raw.githubusercontent.com/xyzs996/free-proxy-health-list/main/http.txt",
 
-        # 31. ALIILAPRO
+        # 28. ALIILAPRO
         "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/http.txt",
 
-        # 32. zloi-user/hideip.me
-        "https://raw.githubusercontent.com/zloi-user/hideip.me/main/http.txt",
-
-        # 33. stormsia
+        # 29. stormsia
         "https://raw.githubusercontent.com/stormsia/proxy-list/main/http.txt",
 
-        # 34. mmpx12
+        # 30. mmpx12
         "https://raw.githubusercontent.com/mmpx12/proxy-list/master/http.txt",
 
-        # 35. openproxylist.xyz (6,000+ Fresh Tested HTTP Proxies)
+        # 31. openproxylist.xyz (6,000+ Fresh Tested HTTP Proxies)
         "https://openproxylist.xyz/http.txt",
 
-        # 36. proxifly (5,200+ Verified HTTP Proxies - 5-min Refresh)
+        # 32. proxifly (5,200+ Verified HTTP Proxies - 5-min Refresh)
         "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/http/data.txt",
 
-        # 37. databay-labs (6,500+ Tested HTTP/HTTPS Proxies)
+        # 33. databay-labs (6,500+ Tested HTTP Proxies)
         "https://raw.githubusercontent.com/databay-labs/free-proxy-list/master/http.txt",
-        "https://raw.githubusercontent.com/databay-labs/free-proxy-list/master/https.txt",
-
-        # 38. ErcinDedeoglu (64,000+ Active Worldwide Proxies)
-        "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/http.txt",
-
-        # 39. zevtyardt (64,000+ Verified HTTP Proxies)
-        "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/http.txt",
     ],
     ProxyProtocol.SOCKS4: [
         # --- Tier 1: Real-Time Verified Champions (Strictly Ranked by <= 700ms Density) ---
@@ -210,10 +194,7 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 16. Zaeem20 (3/30 <= 700ms - 237.0ms Fastest)
         "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks4.txt",
 
-        # 18. Geonode Public REST API (376.4ms Fastest)
-        "https://proxylist.geonode.com/api/proxy-list?protocols=socks4&limit=500&page=1&sort_by=lastChecked&sort_type=desc",
-
-        # 19. socks-proxy.net (300 Dedicated Verified SOCKS4 Proxies - 272.7ms Fastest)
+        # 17. socks-proxy.net (300 Dedicated Verified SOCKS4 Proxies - 272.7ms Fastest)
         "https://www.socks-proxy.net/",
 
         # 21. freeproxy.world (Multi-Page Web Scraping - 283.9ms Fastest)
@@ -266,17 +247,8 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 35. ShiftyTR (661 Proxies - 716ms Fastest)
         "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks4.txt",
 
-        # 36. advanced.name
+        # 34. advanced.name
         "https://advanced.name/freeproxy?type=socks4&page=1",
-
-        # 37. openproxylist.xyz SOCKS4 (3,900+ Dedicated SOCKS4 Proxies)
-        "https://openproxylist.xyz/socks4.txt",
-
-        # 38. ErcinDedeoglu SOCKS4 (22,000+ Active SOCKS4 Proxies)
-        "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/socks4.txt",
-
-        # 39. zevtyardt SOCKS4 (21,000+ Verified SOCKS4 Proxies)
-        "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/socks4.txt",
     ],
     ProxyProtocol.SOCKS5: [
         # --- Tier 1: Real-Time Verified Champions (Strictly Ranked by <= 700ms Density) ---
@@ -327,13 +299,7 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 12. Anonym0usWork1221 (3/30 <= 700ms - 571.7ms Fastest - 50,000 Proxies)
         "https://raw.githubusercontent.com/Anonym0usWork1221/Free-Proxies/master/proxy_files/socks5_proxies.txt",
 
-        # 13. TheSpeedX SOCKS5 (Restored - 3/30 <= 700ms - 142.8ms Fastest!)
-        "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/socks5.txt",
-
-        # 14. vakhov/fresh-proxy-list (2/21 <= 700ms - 325.8ms Fastest)
-        "https://raw.githubusercontent.com/vakhov/fresh-proxy-list/master/socks5.txt",
-
-        # 15. dpangestuw (2/30 <= 700ms - 424.4ms Fastest - 4,989 Proxies)
+        # 13. dpangestuw (2/30 <= 700ms - 424.4ms Fastest - 4,989 Proxies)
         "https://raw.githubusercontent.com/dpangestuw/Free-Proxy/main/socks5_proxies.txt",
 
         # 16. zloi-user/hideip.me (2/30 <= 700ms - 459.0ms Fastest - 19/30 Alive)
@@ -393,14 +359,8 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 34. openproxylist.xyz SOCKS5 (5,000+ Dedicated SOCKS5 Proxies)
         "https://openproxylist.xyz/socks5.txt",
 
-        # 35. iplocate SOCKS5 (1,160+ Verified Anonymous SOCKS5)
+        # 34. iplocate SOCKS5 (1,160+ Verified Anonymous SOCKS5)
         "https://raw.githubusercontent.com/iplocate/free-proxy-list/main/protocols/socks5.txt",
-
-        # 36. ErcinDedeoglu SOCKS5 (73,000+ Worldwide SOCKS5 Proxies)
-        "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/socks5.txt",
-
-        # 37. zevtyardt SOCKS5 (23,000+ Verified SOCKS5 Proxies)
-        "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/socks5.txt",
     ],
 }
 
