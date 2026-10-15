@@ -2,7 +2,7 @@
 Curated list of public APIs and fresh raw repository sources for scraping proxies.
 All sources in this file are active, verified, and empirically benchmarked for <= 700ms latency.
 Sorted strictly by density of sub-700ms alive proxies and round-trip response time.
-Restored valid working repositories (casals-ar SOCKS4, roosterkid SOCKS4, TheSpeedX SOCKS5/HTTP, sunny9577 HTTP).
+Restored valid working repositories (casals-ar SOCKS4, roosterkid SOCKS4, TheSpeedX SOCKS4/SOCKS5/HTTP, sunny9577 HTTP).
 Cleaned of confirmed dead endpoints (e.g. socks-proxy.net from SOCKS5, dead proxy-list.org pages, empty dumps).
 """
 from typing import Dict, List
@@ -244,7 +244,10 @@ PROXY_SOURCES: Dict[ProxyProtocol, List[str]] = {
         # 29. roosterkid (Restored - 150 Proxies - 13/30 Alive - 518.7ms Fastest)
         "https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS4_RAW.txt",
 
-        # 30. proxio-io (1,617 Proxies - 682.8ms Fastest)
+        # 30. TheSpeedX SOCKS4 (2,305 Raw Proxies)
+        "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/socks4.txt",
+
+        # 31. proxio-io (1,617 Proxies - 682.8ms Fastest)
         "https://raw.githubusercontent.com/proxio-io/proxy-list/main/socks4.txt",
 
         # 31. iplocate (112 Proxies - 682.7ms Fastest)
